@@ -1,0 +1,126 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    tags: python,{{type}}
+  name: '{{app_name}}-{{environment}}'
+objects:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      git-branch: master
+    labels:
+      ENV: ${ENV}
+      app: '{{app_name}}'
+      component: frontend
+    name: '{{app_name}}-${ENV}'
+  spec:
+    ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      ENV: ${ENV}
+      app: '{{app_name}}'
+      type: '{{type}}'
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      git-branch: master
+    generation: 1
+    labels:
+      ENV: ${ENV}
+      app: '{{app_name}}'
+      type: '{{type}}'
+    name: '{{app_name}}-${ENV}'
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 2
+    selector:
+      ENV: ${ENV}
+      app: '{{app_name}}'
+      type: '{{type}}'
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          git-branch: master
+        labels:
+          ENV: ${ENV}
+          app: '{{app_name}}'
+          type: '{{type}}'
+      spec:
+        containers:
+        - env:
+          - name: some_var
+            value: some_key
+          image: docker-registry.default.svc:5000/{{namespace}}/{{app_name}}
+          imagePullPolicy: IfNotPresent
+          name: '{{app_name}}'
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources:
+            limits:
+              cpu: '${cpu-limit}'
+              memory: '${memory-limit}'
+            requests:
+              cpu: '${cpu-requested}'
+              memory: '${memory-requested}'
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext:
+          runAsUser: 101
+        terminationGracePeriodSeconds: 10
+        {% if type == "flask" -%}
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        {%- endif %}
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - '{{app_name}}'
+        from:
+          kind: ImageStreamTag
+          name: '{{app_name}}:${ENV}'
+          namespace: '{{namespace}}'
+        lastTriggeredImage: ''
+      type: ImageChange
+    - type: ConfigChange
+  status: {}
+parameters:
+  - name: ENV
+    value: '{{environment}}'
+  - name: 'memory_requested'
+    value: '{{memory_requested}}Mi'
+  - name: 'memory_limit'
+    value: '{{memory_limit}}Mi'
+  - name: 'cpu_requested'
+    value: '{{cpu_requested}}m'
+  - name: 'cpu_limit'
+    value: '{{cpu_limit}}m'

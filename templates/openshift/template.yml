@@ -2,7 +2,7 @@ apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   annotations:
-    tags: python,{{type}}
+    tags: {{type}}
   name: '{{app_name}}-{{environment}}'
 objects:
 - apiVersion: v1
@@ -72,17 +72,25 @@ objects:
             value: some_key
           image: docker-registry.default.svc:5000/{{namespace}}/{{app_name}}
           imagePullPolicy: IfNotPresent
+          {% if type == 'web-app' -%}
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+          {%- endif %}
           name: '{{app_name}}'
           ports:
           - containerPort: 8080
             protocol: TCP
           resources:
             limits:
-              cpu: '${cpu-limit}'
-              memory: '${memory-limit}'
+              cpu: '${cpu_limit}m'
+              memory: '${memory_limit}Mi'
             requests:
-              cpu: '${cpu-requested}'
-              memory: '${memory-requested}'
+              cpu: '${cpu_requested}m'
+              memory: '${memory_requested}Mi'
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
         dnsPolicy: ClusterFirst
@@ -91,14 +99,6 @@ objects:
         securityContext:
           runAsUser: 101
         terminationGracePeriodSeconds: 10
-        {% if type == "flask" -%}
-        livenessProbe:
-          httpGet:
-            path: /health/live
-            port: 8080
-          initialDelaySeconds: 15
-          timeoutSeconds: 1
-        {%- endif %}
     test: false
     triggers:
     - imageChangeParams:
@@ -117,10 +117,10 @@ parameters:
   - name: ENV
     value: '{{environment}}'
   - name: 'memory_requested'
-    value: '{{memory_requested}}Mi'
+    value: '{{memory_requested}}'
   - name: 'memory_limit'
-    value: '{{memory_limit}}Mi'
+    value: '{{memory_limit}}'
   - name: 'cpu_requested'
-    value: '{{cpu_requested}}m'
+    value: '{{cpu_requested}}'
   - name: 'cpu_limit'
-    value: '{{cpu_limit}}m'
+    value: '{{cpu_limit}}'

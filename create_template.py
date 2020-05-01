@@ -18,9 +18,18 @@ from helpers.template import Template
 )
 @click.option(
     "--app-type",
-    required=True,
+    default="exec",
     help="Type of the app.",
-    type=click.Choice(["flask", "exec"], case_sensitive=False),
+    type=click.Choice(["web-app", "exec"], case_sensitive=False),
+    show_default=True,
+)
+@click.option(
+    "-o",
+    "--output-folder",
+    default=".",
+    help="Folder to write the template to",
+    type=str,
+    show_default=True,
 )
 @click.option(
     "--memory-requested",
@@ -55,6 +64,7 @@ def create_template(
     namespace,
     environment,
     app_type,
+    output_folder,
     memory_requested,
     cpu_requested,
     memory_limit,
@@ -64,16 +74,19 @@ def create_template(
     APP: The name of the app.\n
     ENVIRONMENT: Abbreviated name of environment e.g. qas.
     """
-    Template(
+    template = Template(
         app,
         namespace,
         environment,
         app_type,
+        output_folder=output_folder,
         memory_requested=memory_requested,
         cpu_requested=cpu_requested,
         memory_limit=memory_limit,
         cpu_limit=cpu_limit,
-    ).create_template()
+    )
+    template.create_template()
+    click.echo(f"Wrote template file ({template.construct_folder_filename()})")
 
 
 if __name__ == "__main__":

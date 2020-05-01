@@ -55,6 +55,7 @@ def create_jenkinsfile(app, namespace, output_folder):
         os.path.join(input_folder, "wait4rollout.sh"),
         os.path.join(output_folder, "wait4rollout.sh"),
     )
+    click.echo(f"Wrote files to ({output_folder})")
 
 
 if __name__ == "__main__":

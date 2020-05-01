@@ -24,7 +24,7 @@ spec:
     type: Git
   strategy:
     jenkinsPipelineStrategy:
-      jenkinsfilePath: OpenShift/Jenkinsfile
+      jenkinsfilePath: openshift/Jenkinsfile
     type: JenkinsPipeline
   successfulBuildsHistoryLimit: 10
   triggers: []

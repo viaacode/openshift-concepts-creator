@@ -17,6 +17,8 @@ def test_create_jenkinsfile(open_mock, copy_mock):
         create_jenkinsfile, ["test", "--namespace", "namespace"]
     )
     assert result.exit_code == 0
+    output_folder = os.path.join(".", "openshift")
+    assert result.output == f"Wrote files to ({output_folder})\n"
     assert open_mock.call_count == 1
     assert open_mock().__enter__().writelines.call_count == 1
 

@@ -29,7 +29,7 @@ class TestTemplate:
     def test_render_template(self, template):
 
         template_yaml = yaml.safe_load(template.render_template())
-        assert template_yaml["metadata"]["annotations"]["tags"] == f"python,{template.app_type}"
+        assert template_yaml["metadata"]["annotations"]["tags"] == f"{template.app_type}"
         assert template_yaml["metadata"]["name"] == f"{template.app_name}-{template.environment}"
         # Template parameters
         assert template_yaml["parameters"][0]["name"] == "ENV"

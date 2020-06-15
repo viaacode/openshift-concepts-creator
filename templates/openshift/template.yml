@@ -2,7 +2,7 @@ apiVersion: template.openshift.io/v1
 kind: Template
 metadata:
   annotations:
-    tags: {{type}}
+    tags: '{{type}}'
   name: '{{app_name}}-{{environment}}'
 objects:
 - apiVersion: v1
@@ -13,7 +13,6 @@ objects:
     labels:
       ENV: ${ENV}
       app: '{{app_name}}'
-      component: frontend
     name: '{{app_name}}-${ENV}'
   spec:
     ports:
@@ -96,8 +95,6 @@ objects:
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler
-        securityContext:
-          runAsUser: 101
         terminationGracePeriodSeconds: 10
     test: false
     triggers:

@@ -30,7 +30,7 @@ class TestTemplate:
 
         template_yaml = yaml.safe_load(template.render_template())
         assert template_yaml["metadata"]["annotations"]["tags"] == f"{template.app_type}"
-        assert template_yaml["metadata"]["name"] == f"{template.app_name}-{template.environment}"
+        assert template_yaml["metadata"]["name"] == f"{template.app_name}"
         # Template parameters
         assert template_yaml["parameters"][0]["name"] == "ENV"
         assert template_yaml["parameters"][0]["value"] == f"{template.environment}"
@@ -107,7 +107,7 @@ class TestTemplate:
         written_lines = open_mock().__enter__().writelines.call_args[0][0]
         template_yaml = yaml.safe_load(written_lines)
         assert template_yaml["metadata"]["name"] == (
-            f"{template.app_name}-{template.environment}"
+            f"{template.app_name}"
         )
 
     def test_construct_folder_filename(self, template):

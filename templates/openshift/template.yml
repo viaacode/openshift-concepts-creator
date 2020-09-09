@@ -3,7 +3,7 @@ kind: Template
 metadata:
   annotations:
     tags: '{{type}}'
-  name: '{{app_name}}-{{environment}}'
+  name: '{{app_name}}'
 objects:
 - apiVersion: v1
   kind: Service

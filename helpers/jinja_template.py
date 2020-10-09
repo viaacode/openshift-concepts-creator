@@ -10,6 +10,8 @@ class JinjaTemplate:
     def __init__(self, template_base_folder: str):
         self.env = Environment(
             loader=FileSystemLoader(template_base_folder),
+            trim_blocks=True,
+            lstrip_blocks=True,
         )
 
     def render_template(self, filename: str, **kwargs):

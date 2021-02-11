@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import copy
+import os
 from unittest.mock import patch
 
 from click.testing import CliRunner
@@ -41,6 +42,7 @@ def test_create_template_minimal(template_mock):
     assert template_mock.call_args[1]["memory_limit"] == 328
     assert template_mock.call_args[1]["cpu_limit"] == 300
     assert template_mock.call_args[1]["output_folder"] == "."
+    assert not template_mock.call_args[1]["envs"]
 
     assert template_mock().create_template.call_count == 1
 
@@ -55,8 +57,10 @@ def test_create_template_optional_parameters(template_mock):
         "--cpu-limit", 400,
         "--namespace", "ns",
         "--app-type", "web-app",
-        "--output-folder", "output"
+        "--output-folder", "output",
+        "--env-file", os.path.join(os.getcwd(), "tests", "resources", ".env.example"),
     ]
+
     result = _invoke_runner(template_params)
     assert result.exit_code == 0
 
@@ -67,7 +71,7 @@ def test_create_template_optional_parameters(template_mock):
     assert template_mock.call_args[1]["memory_limit"] == 512
     assert template_mock.call_args[1]["cpu_limit"] == 400
     assert template_mock.call_args[1]["output_folder"] == "output"
-
+    assert template_mock.call_args[1]["envs"] == ["env1", "env2"]
     assert template_mock().create_template.call_count == 1
 
 

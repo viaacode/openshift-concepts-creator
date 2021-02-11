@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import os
 
 import click
 
@@ -59,6 +60,11 @@ from helpers.template import Template
     type=int,
     show_default=True,
 )
+@click.option(
+    "--env-file",
+    help="Env file",
+    type=click.File('r'),
+)
 def create_template(
     app,
     namespace,
@@ -69,11 +75,19 @@ def create_template(
     cpu_requested,
     memory_limit,
     cpu_limit,
+    env_file,
 ):
     """
     APP: The name of the app.\n
     ENVIRONMENT: Abbreviated name of environment e.g. qas.
     """
+    envs = []
+    if env_file:
+        try:
+            envs = [env.split("=")[0] for env in env_file.readlines()]
+        except Exception as e:
+            raise click.ClickException(f"Error parsing the env file: {e}")
+
     template = Template(
         app,
         namespace,
@@ -84,6 +98,7 @@ def create_template(
         cpu_requested=cpu_requested,
         memory_limit=memory_limit,
         cpu_limit=cpu_limit,
+        envs=envs,
     )
     template.create_template()
     click.echo(f"Wrote template file ({template.construct_folder_filename()})")

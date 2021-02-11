@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+from typing import List
 
 from helpers.jinja_template import JinjaTemplate
 
@@ -35,8 +36,8 @@ class Template:
         cpu_requested: int = 0,
         memory_limit: int = 0,
         cpu_limit: int = 0,
+        envs: List = [],
     ):
-
         self.app_name = app_name
         self.namespace = namespace
         self.environment = environment
@@ -46,10 +47,11 @@ class Template:
         self.cpu_requested = cpu_requested
         self.memory_limit = memory_limit
         self.cpu_limit = cpu_limit
+        self.envs=envs
 
     def render_template(self):
         """Loads in the jinja2 template and renders it."""
-        jinja = JinjaTemplate(os.path.join(os.getcwd(), "templates", "openshift"))
+        jinja = JinjaTemplate(os.path.join(os.getcwd(), "templates", "openshift"),)
         return jinja.render_template(
             "template.yml",
             app_name=self.app_name,
@@ -60,6 +62,7 @@ class Template:
             cpu_requested=self.cpu_requested,
             memory_limit=self.memory_limit,
             cpu_limit=self.cpu_limit,
+            envs=self.envs,
         )
 
     def construct_folder_filename(self) -> str:

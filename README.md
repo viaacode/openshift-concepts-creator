@@ -74,6 +74,7 @@ Options:
   --memory-limit INTEGER      Maximum limit of memory in Mebibytes.  [default:
                               328]
   --cpu-limit INTEGER         Maximum limit of CPU.  [default: 300]
+  --env-file FILENAME         Env file
   --help                      Show this message and exit.
 ```
 

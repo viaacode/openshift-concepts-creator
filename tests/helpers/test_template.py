@@ -72,12 +72,14 @@ class TestTemplate:
         assert template_yaml["objects"][1]["spec"]["triggers"][0]["imageChangeParams"]["containerNames"][0] == template.app_name
         assert template_yaml["objects"][1]["spec"]["triggers"][0]["imageChangeParams"]["from"]["name"] == f"{template.app_name}:${{ENV}}"
         assert template_yaml["objects"][1]["spec"]["triggers"][0]["imageChangeParams"]["from"]["namespace"] == f"{template.namespace}"
+        assert not template_yaml['objects'][1]['spec']['template']['spec']['containers'][0].get('env')  # No env values
 
     def test_render_template_parameters(self, template):
         template.memory_requested = 256
         template.memory_limit = 512
         template.cpu_requested = 200
         template.cpu_limit = 400
+        template.envs = ["env1", "env2"]
 
         template_yaml = yaml.safe_load(template.render_template())
 
@@ -90,6 +92,11 @@ class TestTemplate:
         assert template_yaml["parameters"][3]["value"] == '200'
         assert template_yaml["parameters"][4]["name"] == "cpu_limit"
         assert template_yaml["parameters"][4]["value"] == '400'
+        assert template_yaml["parameters"][4]["value"] == '400'
+        assert template_yaml['objects'][1]['spec']['template']['spec']['containers'][0]['env'] == [
+            {'name': 'env1', 'value': 'some_value'},
+            {'name': 'env2', 'value': 'some_value'}
+        ]
 
     def test_render_template_type_not_web(self, template):
         template.app_type = "exec"
